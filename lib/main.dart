@@ -27,9 +27,7 @@ import 'domain/usecases/tracking/validate_gps_point_usecase.dart';
 import 'presentation/bloc/route/route_bloc.dart';
 import 'presentation/bloc/tracking/tracking_bloc.dart';
 import 'presentation/cubit/location/location_cubit.dart';
-import 'presentation/cubit/route_creation/route_creation_cubit.dart';
 import 'presentation/cubit/settings/settings_cubit.dart';
-import 'presentation/pages/home/home_page.dart';
 import 'presentation/routes/app_router.dart';
 import 'presentation/theme/app_theme.dart';
 
@@ -154,12 +152,7 @@ class RouteBuilderApp extends StatelessWidget {
       themeMode: ThemeMode.system,
       debugShowCheckedModeBanner: false,
       onGenerateRoute: appRouter.onGenerateRoute,
-      home: BlocProvider(
-        create: (_) => RouteCreationCubit(
-          saveRouteUseCase: saveRouteUseCase,
-        ),
-        child: const HomePage(),
-      ),
+      initialRoute: '/splash',
     );
   }
 }

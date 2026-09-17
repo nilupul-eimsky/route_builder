@@ -8,6 +8,7 @@ import '../cubit/location/location_cubit.dart';
 import '../cubit/route_creation/route_creation_cubit.dart';
 import '../pages/create_route/create_route_page.dart';
 import '../pages/home/home_page.dart';
+import '../pages/splash/splash_page.dart';
 import '../pages/json_viewer/json_viewer_page.dart';
 import '../pages/route_details/route_details_page.dart';
 import '../pages/settings/settings_page.dart';
@@ -21,6 +22,11 @@ class AppRouter {
 
   Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
+      case '/splash':
+        return MaterialPageRoute(
+          builder: (_) => const SplashPage(),
+        );
+
       case '/':
         return MaterialPageRoute(
           builder: (_) => const HomePage(),
