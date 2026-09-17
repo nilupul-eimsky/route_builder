@@ -60,12 +60,49 @@ class _RouteDetailsPageState extends State<RouteDetailsPage> {
     );
   }
 
-  Future<void> _exportJson(RouteEntity route) async {
-    final content = const JsonEncoder.withIndent('  ').convert({
+  Map<String, dynamic> _buildRouteJson(RouteEntity route) {
+    return {
       'id': route.id,
       'name': route.name,
       'createdAt': route.createdAt.toUtc().toIso8601String(),
-    });
+      'coordinates': route.coordinates
+          .map((c) => {'latitude': c.latitude, 'longitude': c.longitude})
+          .toList(),
+      'sessions': _sessions.map((s) {
+        return {
+          'id': s.id,
+          'startedAt': s.startedAt.toUtc().toIso8601String(),
+          'endedAt': s.endedAt?.toUtc().toIso8601String(),
+          'status': s.status.name,
+          'totalDistanceMeters': s.totalDistanceMeters,
+          'pointCount': s.points.length,
+          'points': s.points
+              .map((p) => {
+                    'latitude': p.latitude,
+                    'longitude': p.longitude,
+                    'timestamp': p.timestamp.toUtc().toIso8601String(),
+                    'accuracy': p.accuracy,
+                    'speed': p.speed,
+                    if (p.altitude != null) 'altitude': p.altitude,
+                  })
+              .toList(),
+          'stops': s.stops
+              .map((stop) => {
+                    'id': stop.id,
+                    'name': stop.name,
+                    'latitude': stop.latitude,
+                    'longitude': stop.longitude,
+                    'recordedAt': stop.recordedAt.toUtc().toIso8601String(),
+                  })
+              .toList(),
+        };
+      }).toList(),
+    };
+  }
+
+  Future<void> _exportJson(RouteEntity route) async {
+    final content =
+        const JsonEncoder.withIndent('  ').convert(_buildRouteJson(route));
     final dir = await getTemporaryDirectory();
     final file = File('${dir.path}/${_safeName(route.name)}.json');
     await file.writeAsString(content);
@@ -76,11 +113,7 @@ class _RouteDetailsPageState extends State<RouteDetailsPage> {
   }
 
   void _viewJson(RouteEntity route) {
-    final json = const JsonEncoder.withIndent('  ').convert({
-      'id': route.id,
-      'name': route.name,
-      'createdAt': route.createdAt.toUtc().toIso8601String(),
-    });
+    final json = const JsonEncoder.withIndent('  ').convert(_buildRouteJson(route));
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) =>

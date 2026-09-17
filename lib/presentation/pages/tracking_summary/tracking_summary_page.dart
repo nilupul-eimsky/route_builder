@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../core/utils/distance_calculator.dart';
@@ -145,11 +147,19 @@ class _TrackingSummaryPageState extends State<TrackingSummaryPage> {
     );
   }
 
+  String _safeName(String name) =>
+      name.replaceAll(RegExp(r'[^\w\s-]'), '').replaceAll(' ', '_');
+
   Future<void> _exportGeoJson() async {
-    final json =
+    final content =
         GeoJsonSerializer.toFeatureCollectionString(widget.route, widget.session);
-    await Share.share(json,
-        subject: '${widget.route.name}_tracking.geojson');
+    final dir = await getTemporaryDirectory();
+    final file = File('${dir.path}/${_safeName(widget.route.name)}_tracking.geojson');
+    await file.writeAsString(content);
+    await Share.shareXFiles(
+      [XFile(file.path, mimeType: 'application/geo+json')],
+      subject: widget.route.name,
+    );
   }
 
   Future<void> _exportJson() async {
@@ -182,8 +192,14 @@ class _TrackingSummaryPageState extends State<TrackingSummaryPage> {
             .toList(),
       },
     };
-    final json = const JsonEncoder.withIndent('  ').convert(data);
-    await Share.share(json, subject: '${widget.route.name}_tracking.json');
+    final content = const JsonEncoder.withIndent('  ').convert(data);
+    final dir = await getTemporaryDirectory();
+    final file = File('${dir.path}/${_safeName(widget.route.name)}_tracking.json');
+    await file.writeAsString(content);
+    await Share.shareXFiles(
+      [XFile(file.path, mimeType: 'application/json')],
+      subject: widget.route.name,
+    );
   }
 
   Widget _exportButtons(BuildContext context) {
